@@ -1,0 +1,6 @@
+id=par_kirin970_scheduler
+name=PAR Kirin 970 Scheduler
+version=1.0
+versionCode=10000
+author=yukino1111 / PAR project
+description=Safe PAR-AL00 scheduler profiles with WebUI app rules and a Mountify-backed systemless UniPerf override.

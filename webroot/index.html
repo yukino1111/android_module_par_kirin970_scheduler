@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>PAR Kirin 970 Scheduler</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <button id="back" class="icon-button back-button" aria-label="返回首页">←</button>
+      <div>
+        <p class="eyebrow">PAR · KIRIN 970</p>
+        <h1 id="pageTitle">调度控制台</h1>
+        <p id="runtime" class="muted">正在读取运行状态…</p>
+      </div>
+      <button id="refresh" class="icon-button" aria-label="刷新">↻</button>
+    </header>
+
+    <div class="page active" data-page="home">
+      <section class="panel">
+        <div class="section-title">
+          <div><h2>全局档位</h2><p>未命中应用规则时使用</p></div>
+          <span id="activeBadge" class="badge">—</span>
+        </div>
+        <div id="profileCards" class="profile-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <div><h2>动态切换</h2><p>按当前前台应用选择档位；无规则时不查询前台</p></div>
+          <label class="switch"><input id="dynamicEnabled" type="checkbox"><span></span></label>
+        </div>
+        <label class="field compact">
+          <span>检测间隔</span>
+          <select id="pollInterval">
+            <option value="1">1 秒</option><option value="2">2 秒</option>
+            <option value="3">3 秒</option><option value="5">5 秒</option>
+            <option value="10">10 秒</option>
+          </select>
+        </label>
+        <p id="foreground" class="mono muted">前台应用：—</p>
+        <p class="hint">只在应用发生切换时重新写入调度参数；更在意续航可选 3–5 秒。</p>
+      </section>
+
+      <section class="menu-grid">
+        <button class="menu-card" data-nav="apps">
+          <span><strong>应用规则</strong><small>为软件指定省电、均衡或性能档</small></span><b>›</b>
+        </button>
+        <button class="menu-card" data-nav="params">
+          <span><strong>自定义参数</strong><small>编辑三档参数或恢复模块默认值</small></span><b>›</b>
+        </button>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <div><h2>UniPerf 事件策略</h2><p>华为用户态性能事件配置；systemless 覆盖</p></div>
+        </div>
+        <div class="segmented">
+          <button data-uniperf="balanced">原厂均衡</button>
+          <button data-uniperf="performance">增强性能</button>
+        </div>
+        <p class="hint">它与下面可编辑的 CPU/GPU 常驻档位相互独立；切换后重启生效。</p>
+        <p id="mountState" class="muted mono"></p>
+      </section>
+    </div>
+
+    <div class="page" data-page="apps">
+      <section class="panel">
+        <div class="section-title">
+          <div><h2>应用规则</h2><p>仅保存包名与三档映射</p></div>
+          <button id="loadApps" class="secondary">读取应用</button>
+        </div>
+        <input id="appSearch" class="search" type="search" placeholder="搜索应用名或包名" disabled>
+        <div id="appList" class="app-list"><p class="empty">进入页面后自动读取软件列表</p></div>
+      </section>
+    </div>
+
+    <div class="page" data-page="params">
+      <section class="panel">
+        <div class="section-title">
+          <div><h2>三档参数</h2><p>保存后立即重新应用当前生效档</p></div>
+        </div>
+        <div class="tabs" id="editorTabs"></div>
+        <form id="profileEditor"></form>
+        <div class="button-stack">
+          <button id="saveProfile" class="primary wide">保存当前档参数</button>
+          <button id="resetProfile" class="secondary wide">恢复当前档默认</button>
+          <button id="resetAllProfiles" class="text-button wide">三档全部恢复默认</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="notice" role="status"></div>
+  </main>
+  <script>
+    window.addEventListener('error', event => {
+      const runtime = document.getElementById('runtime');
+      if (runtime) runtime.textContent = `WebUI 脚本错误：${event.message || '未知错误'}`;
+    });
+    window.addEventListener('unhandledrejection', event => {
+      const runtime = document.getElementById('runtime');
+      const message = event.reason && event.reason.message ? event.reason.message : String(event.reason || '未知错误');
+      if (runtime) runtime.textContent = `WebUI 运行错误：${message}`;
+    });
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

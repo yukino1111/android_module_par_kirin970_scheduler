@@ -1,0 +1,4 @@
+# The PAR framework gates its Huawei UniPerf bridge with this read-only flag.
+# The platform policy carries the same narrow grant in newly built images; this
+# systemless copy fixes already-installed 202608120835 images after a soft reboot.
+allow system_server kirin_perfgenius_prop file { getattr open read map }

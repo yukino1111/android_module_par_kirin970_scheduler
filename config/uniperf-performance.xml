@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy version="1.0">
+    <!-- PAR-authored opt-in policy for the Android 13 performance mode. -->
+    <cmd id="4096" name="touch_move">
+        <action>
+            <duration_ms>80</duration_ms>
+            <big_cpu0_min_freq>1652000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+        </action>
+    </cmd>
+
+    <cmd id="4097" name="scroller_boost">
+        <action>
+            <duration_ms>1000</duration_ms>
+            <big_cpu0_min_freq>1652000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+            <ipa_power>4500</ipa_power>
+        </action>
+    </cmd>
+
+    <cmd id="4098" name="window_switch">
+        <action>
+            <duration_ms>550</duration_ms>
+            <big_cpu0_min_freq>1863000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+            <gpu_min_freq>415000000</gpu_min_freq>
+            <gpu_max_freq>767000000</gpu_max_freq>
+            <ddr_min_freq>1866000000</ddr_min_freq>
+            <ipa_power>4500</ipa_power>
+        </action>
+        <action>
+            <duration_ms>150</duration_ms>
+        </action>
+    </cmd>
+
+    <cmd id="4099" name="app_start">
+        <action>
+            <duration_ms>3000</duration_ms>
+            <big_cpu0_min_freq>2362000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+            <gpu_min_freq>767000000</gpu_min_freq>
+            <gpu_max_freq>767000000</gpu_max_freq>
+            <ddr_min_freq>1866000000</ddr_min_freq>
+            <ipa_power>4500</ipa_power>
+        </action>
+        <action>
+            <duration_ms>150</duration_ms>
+        </action>
+    </cmd>
+
+    <!-- Empty compatibility slots required by the vendor service parser. -->
+    <cmd id="4100" name="set_boost_eas"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4101" name="reset_boost_eas"><action><duration_ms>0</duration_ms></action></cmd>
+
+    <cmd id="4102" name="screen_on">
+        <action>
+            <duration_ms>1000</duration_ms>
+            <big_cpu0_min_freq>1210000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>1210000</big_cpu0_max_freq>
+            <gpu_min_freq>103750000</gpu_min_freq>
+            <gpu_max_freq>103750000</gpu_max_freq>
+        </action>
+    </cmd>
+
+    <cmd id="4103" name="finger_print">
+        <action>
+            <duration_ms>500</duration_ms>
+            <big_cpu0_min_freq>1652000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+        </action>
+    </cmd>
+
+    <cmd id="4105" name="rotation">
+        <action>
+            <duration_ms>1000</duration_ms>
+            <big_cpu0_min_freq>1863000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+            <gpu_min_freq>415000000</gpu_min_freq>
+            <gpu_max_freq>767000000</gpu_max_freq>
+            <ddr_min_freq>1866000000</ddr_min_freq>
+            <ipa_power>4500</ipa_power>
+        </action>
+    </cmd>
+
+    <cmd id="4107" name="level_0"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4108" name="level_1"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4109" name="level_2"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4110" name="level_3"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4111" name="level_4"><action><duration_ms>0</duration_ms></action></cmd>
+
+    <cmd id="4112" name="list_fling">
+        <action>
+            <duration_ms>5000</duration_ms>
+            <ipa_power>4500</ipa_power>
+        </action>
+    </cmd>
+
+    <cmd id="4113" name="iaware_eas_default"><action><duration_ms>0</duration_ms></action></cmd>
+    <cmd id="4114" name="iaware_eas_screen_off"><action><duration_ms>0</duration_ms></action></cmd>
+
+    <cmd id="4116" name="probe">
+        <action>
+            <duration_ms>100</duration_ms>
+            <big_cpu0_min_freq>1863000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+        </action>
+    </cmd>
+
+    <cmd id="5376" name="set_default_level"><action><duration_ms>0</duration_ms></action></cmd>
+</policy>
