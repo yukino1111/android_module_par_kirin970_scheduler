@@ -12,6 +12,8 @@ The module provides:
 - powersave, balanced, and performance profiles, with balanced selected by
   default;
 - global, per-application, and custom profile controls in KernelSU WebUI;
+- an English/Chinese WebUI that follows the system language on first use and
+  remembers manual language changes;
 - foreground-application switching with cached settings and low idle polling
   overhead;
 - guarded writes to existing writable CPUFreq, GPU devfreq, and EAS nodes;

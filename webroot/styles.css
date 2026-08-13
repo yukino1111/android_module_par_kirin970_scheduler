@@ -16,6 +16,7 @@ main { max-width: 760px; margin: 0 auto; padding: max(22px, env(safe-area-inset-
 header, .section-title { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 header { position: relative; padding: 10px 4px 22px; }
 header > div { min-width: 0; flex: 1; }
+.header-actions { display: flex; flex: 0 0 auto; gap: 7px; }
 h1 { margin: 2px 0 5px; font-size: 30px; letter-spacing: -.8px; }
 h2 { margin: 0; font-size: 18px; }
 p { margin: 5px 0 0; }
@@ -33,6 +34,7 @@ button:active { transform: scale(.98); }
 .profile-card.selected { border-color: var(--accent); background: #17342d; }
 .badge { padding: 5px 9px; border-radius: 999px; color: #06140f; background: var(--accent); font-size: 12px; font-weight: 800; }
 .icon-button { width: 42px; height: 42px; border: 1px solid var(--line); font-size: 22px; }
+.language-button { min-width: 42px; height: 42px; padding: 0 9px; border: 1px solid var(--line); color: var(--accent); font-size: 13px; font-weight: 800; }
 .back-button { display: none; flex: 0 0 42px; }
 .back-button.visible { display: block; }
 .primary, .secondary { padding: 10px 14px; font-weight: 700; }
