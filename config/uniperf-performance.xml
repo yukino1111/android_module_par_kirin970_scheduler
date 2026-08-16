@@ -3,16 +3,16 @@
     <!-- PAR-authored opt-in policy for the Android 13 performance mode. -->
     <cmd id="4096" name="touch_move">
         <action>
-            <duration_ms>80</duration_ms>
-            <big_cpu0_min_freq>1652000</big_cpu0_min_freq>
+            <duration_ms>250</duration_ms>
+            <big_cpu0_min_freq>1863000</big_cpu0_min_freq>
             <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
         </action>
     </cmd>
 
     <cmd id="4097" name="scroller_boost">
         <action>
-            <duration_ms>1000</duration_ms>
-            <big_cpu0_min_freq>1652000</big_cpu0_min_freq>
+            <duration_ms>1200</duration_ms>
+            <big_cpu0_min_freq>2093000</big_cpu0_min_freq>
             <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
             <ipa_power>4500</ipa_power>
         </action>
@@ -90,7 +90,10 @@
 
     <cmd id="4112" name="list_fling">
         <action>
-            <duration_ms>5000</duration_ms>
+            <duration_ms>1200</duration_ms>
+            <big_cpu0_min_freq>2093000</big_cpu0_min_freq>
+            <big_cpu0_max_freq>2362000</big_cpu0_max_freq>
+            <ddr_min_freq>1244000000</ddr_min_freq>
             <ipa_power>4500</ipa_power>
         </action>
     </cmd>
