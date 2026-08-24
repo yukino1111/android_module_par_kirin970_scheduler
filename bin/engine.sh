@@ -69,7 +69,53 @@ apply_profile() {
   log_msg "applied profile=$profile"
 }
 
+# UniPerf restores CPU/GPU limits captured by the vendor service before this
+# module applies its persistent profile. Restore only the affected component
+# after the daemon has observed that the finite event returned to that vendor
+# baseline. Keeping this separate from apply_profile avoids rewriting governor,
+# EAS, or unrelated cluster settings after every framework boost.
+restore_uniperf_component() {
+  profile="$1"
+  component="$2"
+  allowed_profile "$profile" || return 1
+  profile_file="$CONFIG_DIR/$profile.conf"
+  [ -f "$profile_file" ] || return 1
+
+  case "$component" in
+    big)
+      desired_min="$(profile_value big_min "$profile_file")"
+      desired_max="$(profile_value big_max "$profile_file")"
+      current_min="$(cat "$BIG/scaling_min_freq" 2>/dev/null)"
+      current_max="$(cat "$BIG/scaling_max_freq" 2>/dev/null)"
+      if [ "$current_max" != "$desired_max" ]; then
+        [ "$current_min" -le "$desired_max" ] 2>/dev/null || return 1
+        node_write "$BIG/scaling_max_freq" "$desired_max"
+      fi
+      current_max="$(cat "$BIG/scaling_max_freq" 2>/dev/null)"
+      [ "$desired_min" -le "$current_max" ] 2>/dev/null || return 1
+      node_write "$BIG/scaling_min_freq" "$desired_min"
+      ;;
+    gpu)
+      desired_min="$(profile_value gpu_min "$profile_file")"
+      desired_max="$(profile_value gpu_max "$profile_file")"
+      current_min="$(cat "$GPU/min_freq" 2>/dev/null)"
+      current_max="$(cat "$GPU/max_freq" 2>/dev/null)"
+      if [ "$current_max" != "$desired_max" ]; then
+        [ "$current_min" -le "$desired_max" ] 2>/dev/null || return 1
+        node_write "$GPU/max_freq" "$desired_max"
+      fi
+      current_max="$(cat "$GPU/max_freq" 2>/dev/null)"
+      [ "$desired_min" -le "$current_max" ] 2>/dev/null || return 1
+      node_write "$GPU/min_freq" "$desired_min"
+      ;;
+    *) return 2 ;;
+  esac
+
+  log_msg "restored UniPerf component=$component profile=$profile"
+}
+
 case "$1" in
   apply) apply_profile "$2" ;;
-  *) printf 'usage: %s apply <powersave|balanced|performance>\n' "$0" >&2; exit 2 ;;
+  restore-uniperf) restore_uniperf_component "$2" "$3" ;;
+  *) printf 'usage: %s {apply <profile>|restore-uniperf <profile> <big|gpu>}\n' "$0" >&2; exit 2 ;;
 esac

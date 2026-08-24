@@ -64,6 +64,23 @@ allowed_profile() {
   esac
 }
 
+# Return success only after a UniPerf-controlled minimum has returned to the
+# immutable vendor baseline and the selected profile still differs. Requiring
+# an exact reset maximum before restoring only a max avoids undoing thermal
+# caps or an in-flight finite boost.
+uniperf_component_needs_restore() {
+  actual_min="$1"
+  actual_max="$2"
+  reset_min="$3"
+  reset_max="$4"
+  desired_min="$5"
+  desired_max="$6"
+
+  [ "$actual_min" = "$reset_min" ] || return 1
+  [ "$actual_min" != "$desired_min" ] && return 0
+  [ "$actual_max" = "$reset_max" ] && [ "$actual_max" != "$desired_max" ]
+}
+
 atomic_replace() {
   source_file="$1"
   target_file="$2"

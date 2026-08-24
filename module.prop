@@ -1,6 +1,6 @@
 id=par_kirin970_scheduler
 name=PAR Kirin 970 Scheduler
-version=1.0.2
-versionCode=10002
+version=1.0.3
+versionCode=10003
 author=yukino1111 / PAR project
-description=Safe PAR-AL00 scheduler profiles with WebUI app rules and a Mountify-backed systemless UniPerf override.
+description=PAR-AL00 CPU, GPU, DDR, EAS, app-rule, and UniPerf scheduler controls.

@@ -87,6 +87,51 @@ load_runtime_config() {
   fi
 }
 
+uniperf_reset_value() {
+  conf_get "$1" "$CONFIG_DIR/defaults/balanced.conf"
+}
+
+# The immutable balanced template matches the limits cached by Huawei's
+# UniPerf service at boot. An active boost uses a different minimum frequency;
+# wait until that minimum returns to the cached baseline before restoring the
+# user's selected profile. This preserves finite boosts while repairing all
+# three profiles after their expiry. Maximum-frequency restoration is gated by
+# an exact vendor-baseline match so a thermal reduction is never raised.
+reconcile_uniperf_limits() {
+  profile="$1"
+  profile_file="$CONFIG_DIR/$profile.conf"
+  [ -f "$profile_file" ] || return 0
+
+  big_dir=/sys/devices/system/cpu/cpu4/cpufreq
+  gpu_dir=/sys/devices/platform/e82c0000.mali/devfreq/gpufreq
+
+  desired_big_min="$(conf_get big_min "$profile_file")"
+  desired_big_max="$(conf_get big_max "$profile_file")"
+  reset_big_min="$(uniperf_reset_value big_min)"
+  reset_big_max="$(uniperf_reset_value big_max)"
+  actual_big_min="$(cat "$big_dir/scaling_min_freq" 2>/dev/null)"
+  actual_big_max="$(cat "$big_dir/scaling_max_freq" 2>/dev/null)"
+  if uniperf_component_needs_restore \
+       "$actual_big_min" "$actual_big_max" \
+       "$reset_big_min" "$reset_big_max" \
+       "$desired_big_min" "$desired_big_max"; then
+    "$MODDIR/bin/engine.sh" restore-uniperf "$profile" big
+  fi
+
+  desired_gpu_min="$(conf_get gpu_min "$profile_file")"
+  desired_gpu_max="$(conf_get gpu_max "$profile_file")"
+  reset_gpu_min="$(uniperf_reset_value gpu_min)"
+  reset_gpu_max="$(uniperf_reset_value gpu_max)"
+  actual_gpu_min="$(cat "$gpu_dir/min_freq" 2>/dev/null)"
+  actual_gpu_max="$(cat "$gpu_dir/max_freq" 2>/dev/null)"
+  if uniperf_component_needs_restore \
+       "$actual_gpu_min" "$actual_gpu_max" \
+       "$reset_gpu_min" "$reset_gpu_max" \
+       "$desired_gpu_min" "$desired_gpu_max"; then
+    "$MODDIR/bin/engine.sh" restore-uniperf "$profile" gpu
+  fi
+}
+
 last_profile=
 last_package=
 load_runtime_config
@@ -114,6 +159,8 @@ while :; do
       last_profile="$selected_profile"
     fi
     force_apply=0
+  else
+    reconcile_uniperf_limits "$selected_profile"
   fi
 
   if [ "$package_name" != "$last_package" ]; then
