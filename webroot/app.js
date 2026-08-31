@@ -41,10 +41,10 @@ const messages = {
   en: {
     backHome: 'Back to home', refresh: 'Refresh', loadingStatus: 'Loading runtime status…', globalProfile: 'Global profile',
     globalProfileHint: 'Used when no app rule matches', dynamicSwitching: 'Dynamic switching',
-    dynamicSwitchingHint: 'Select a profile by foreground app; no polling without rules',
-    pollInterval: 'Polling interval', seconds1: '1 second', seconds2: '2 seconds',
+    dynamicSwitchingHint: 'Select a profile from the kernel top-app cgroup',
+    pollInterval: 'Top-app sample interval', seconds1: '1 second', seconds2: '2 seconds',
     seconds3: '3 seconds', seconds5: '5 seconds', seconds10: '10 seconds',
-    pollHint: 'Scheduler parameters are only rewritten when the app changes. Use 3–5 seconds for better battery life.',
+    pollHint: 'Reads the small top-app cgroup file directly; no repeated dumpsys calls.',
     appRules: 'App rules', appRulesHint: 'Assign a powersave, balanced, or performance profile',
     customParameters: 'Custom parameters', customParametersHint: 'Edit profiles or restore module defaults',
     uniperfPolicy: 'UniPerf event policy', uniperfPolicyHint: 'Huawei userspace performance events; systemless override',
@@ -56,7 +56,7 @@ const messages = {
     saveProfile: 'Save current profile', resetProfile: 'Restore current profile defaults',
     resetAllProfiles: 'Restore all profile defaults',
     powersave: 'Powersave', balanced: 'Balanced', performance: 'Performance',
-    powersaveDesc: 'Lower clocks and gentle response', balancedDesc: 'Close to stock device behavior',
+    powersaveDesc: 'Lower clocks and gentle response', balancedDesc: 'Fluid daily use without fixed high clocks',
     performanceDesc: 'Explicit high performance', homeTitle: 'Scheduler Console', appsTitle: 'App Rules',
     paramsTitle: 'Custom Parameters', commandFailed: 'Command failed: {code}', globalSwitched: 'Global profile changed to {profile}',
     uniperfSaved: 'UniPerf policy saved; reboot to apply', unknownContext: 'unknown context',
@@ -70,7 +70,7 @@ const messages = {
     noApps: 'Package manager returned no apps', appsLoaded: 'Loaded {count} apps{fallback}',
     compatibilityMode: ' (compatibility mode)', loadAppsFailed: 'Failed to load apps: {error}', reload: 'Reload',
     dynamicChanged: 'Dynamic switching {state}', enabled: 'enabled', disabled: 'disabled',
-    intervalChanged: 'Polling interval: {seconds} seconds', profileSaved: '{profile} profile saved',
+    intervalChanged: 'Top-app sample interval: {seconds} seconds', profileSaved: '{profile} profile saved',
     saveFailed: 'Save failed: {error}', resetConfirm: 'Restore module defaults for the {profile} profile?',
     profileRestored: '{profile} profile restored to defaults', resetFailed: 'Restore failed: {error}',
     resetAllConfirm: 'Restore module defaults for all three profiles?', allRestored: 'All profiles restored to defaults',
@@ -81,13 +81,16 @@ const messages = {
     big_max: 'Big CPU maximum frequency', big_hispeed: 'Big CPU hispeed frequency',
     big_go_hispeed_load: 'Big CPU go-hispeed load', big_target_loads: 'Big CPU target loads',
     big_above_hispeed_delay: 'Big CPU above-hispeed delay', big_min_sample_time: 'Big CPU minimum sample time',
-    gpu_min: 'GPU minimum frequency', gpu_max: 'GPU maximum frequency', eas_boost: 'EAS boost (0–100)'
+    gpu_min: 'GPU minimum frequency', gpu_max: 'GPU maximum frequency', eas_boost: 'Kirin global EAS boost switch',
+    stune_boost: 'Game cgroup schedtune boost', stune_prefer_idle: 'Game cgroup prefer-idle switch',
+    ddr_latency_min: 'Huawei DDR latency minimum vote'
   },
   zh: {
     backHome: '返回首页', refresh: '刷新', loadingStatus: '正在读取运行状态…', globalProfile: '全局档位', globalProfileHint: '未命中应用规则时使用',
-    dynamicSwitching: '动态切换', dynamicSwitchingHint: '按当前前台应用选择档位；无规则时不查询前台',
-    pollInterval: '检测间隔', seconds1: '1 秒', seconds2: '2 秒', seconds3: '3 秒', seconds5: '5 秒', seconds10: '10 秒',
-    pollHint: '只在应用发生切换时重新写入调度参数；更在意续航可选 3–5 秒。', appRules: '应用规则',
+    dynamicSwitching: '动态切换', dynamicSwitchingHint: '直接按内核 top-app cgroup 选择前台应用档位',
+    pollInterval: 'top-app 采样间隔', seconds1: '1 秒', seconds2: '2 秒', seconds3: '3 秒', seconds5: '5 秒', seconds10: '10 秒',
+    pollHint: '只读取很小的 top-app cgroup 文件，不再反复调用 dumpsys。',
+    appRules: '应用规则',
     appRulesHint: '为软件指定省电、均衡或性能档', customParameters: '自定义参数',
     customParametersHint: '编辑三档参数或恢复模块默认值', uniperfPolicy: 'UniPerf 事件策略',
     uniperfPolicyHint: '华为用户态性能事件配置；systemless 覆盖', stockBalanced: '原厂均衡',
@@ -96,7 +99,7 @@ const messages = {
     appsAutoLoad: '进入页面后自动读取软件列表', profileParameters: '三档参数',
     profileParametersHint: '保存后立即重新应用当前生效档', saveProfile: '保存当前档参数',
     resetProfile: '恢复当前档默认', resetAllProfiles: '三档全部恢复默认', powersave: '省电', balanced: '均衡',
-    performance: '性能', powersaveDesc: '降频与温和响应', balancedDesc: '接近设备原厂状态',
+    performance: '性能', powersaveDesc: '降频与温和响应', balancedDesc: '面向日常流畅，不常驻锁高频',
     performanceDesc: '显式高性能', homeTitle: '调度控制台', appsTitle: '应用规则', paramsTitle: '自定义参数',
     commandFailed: '命令失败：{code}', globalSwitched: '全局档位已切换为{profile}',
     uniperfSaved: 'UniPerf 策略已保存，重启后生效', unknownContext: '未知标签', eventEnabled: '事件已启用',
@@ -107,7 +110,7 @@ const messages = {
     systemApp: '系统', followGlobal: '跟随全局', noMatches: '没有匹配的软件', loading: '读取中…',
     noApps: '系统包管理器没有返回应用', appsLoaded: '已读取 {count} 个软件{fallback}', compatibilityMode: '（兼容模式）',
     loadAppsFailed: '读取软件列表失败：{error}', reload: '重新读取', dynamicChanged: '动态切换已{state}',
-    enabled: '启用', disabled: '停用', intervalChanged: '检测间隔：{seconds} 秒', profileSaved: '{profile}档参数已保存',
+    enabled: '启用', disabled: '停用', intervalChanged: 'top-app 采样间隔：{seconds} 秒', profileSaved: '{profile}档参数已保存',
     saveFailed: '保存失败：{error}', resetConfirm: '恢复{profile}档的模块默认参数？',
     profileRestored: '{profile}档已恢复默认', resetFailed: '恢复失败：{error}',
     resetAllConfirm: '将省电、均衡、性能三档全部恢复为模块默认参数？', allRestored: '三档参数已全部恢复默认',
@@ -117,7 +120,9 @@ const messages = {
     big_min: '大核最低频率', big_max: '大核最高频率', big_hispeed: '大核 Hispeed',
     big_go_hispeed_load: '大核升频负载', big_target_loads: '大核 Target loads',
     big_above_hispeed_delay: '大核升频延迟', big_min_sample_time: '大核最短采样时间',
-    gpu_min: 'GPU 最低频率', gpu_max: 'GPU 最高频率', eas_boost: 'EAS Boost（0~100）'
+    gpu_min: 'GPU 最低频率', gpu_max: 'GPU 最高频率', eas_boost: 'Kirin 全局 EAS 加速开关',
+    stune_boost: '游戏 cgroup schedtune boost', stune_prefer_idle: '游戏 cgroup 优先空闲核开关',
+    ddr_latency_min: '华为 DDR 延迟最低频率投票'
   }
 };
 
@@ -149,7 +154,10 @@ const fields = [
   ['big_target_loads','大核 Target loads','text','full'], ['big_above_hispeed_delay','大核升频延迟','text','full'],
   ['big_min_sample_time','大核最短采样时间','number'],
   ['gpu_min','GPU 最低频率','select',gpuFreqs], ['gpu_max','GPU 最高频率','select',gpuFreqs],
-  ['eas_boost','EAS Boost（0~100）','number']
+  ['eas_boost','Kirin 全局 EAS 加速开关','select',['0','1']],
+  ['stune_boost','游戏 cgroup schedtune boost','number'],
+  ['stune_prefer_idle','游戏 cgroup 优先空闲核开关','select',['0','1']],
+  ['ddr_latency_min','华为 DDR 延迟最低频率投票','select',['0','533000000','1244000000','1866000000']]
 ];
 
 let state = {};
@@ -290,7 +298,7 @@ function renderEditor() {
         `<option value="${value}" ${values[key] === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label>`;
     }
     const constraints = key.includes('go_hispeed') ? 'min="1" max="100"' :
-      key === 'eas_boost' ? 'min="0" max="100"' :
+      key === 'stune_boost' ? 'min="0" max="100"' :
       type === 'number' ? 'min="1000" max="500000"' : '';
     return `<label class="field${full}"><span>${title}</span><input name="${key}" type="${type}" ${constraints} value="${values[key] || ''}"></label>`;
   }).join('');

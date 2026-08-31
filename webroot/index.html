@@ -33,11 +33,11 @@
 
       <section class="panel">
         <div class="section-title">
-          <div><h2 data-i18n="dynamicSwitching">Dynamic switching</h2><p data-i18n="dynamicSwitchingHint">Select a profile by foreground app; no polling without rules</p></div>
+          <div><h2 data-i18n="dynamicSwitching">Dynamic switching</h2><p data-i18n="dynamicSwitchingHint">Select a profile from the kernel top-app cgroup</p></div>
           <label class="switch"><input id="dynamicEnabled" type="checkbox"><span></span></label>
         </div>
         <label class="field compact">
-          <span data-i18n="pollInterval">Polling interval</span>
+          <span data-i18n="pollInterval">Top-app sample interval</span>
           <select id="pollInterval">
             <option value="1" data-i18n="seconds1">1 second</option><option value="2" data-i18n="seconds2">2 seconds</option>
             <option value="3" data-i18n="seconds3">3 seconds</option><option value="5" data-i18n="seconds5">5 seconds</option>
@@ -45,7 +45,7 @@
           </select>
         </label>
         <p id="foreground" class="mono muted">Foreground app: —</p>
-        <p class="hint" data-i18n="pollHint">Scheduler parameters are only rewritten when the app changes. Use 3–5 seconds for better battery life.</p>
+        <p class="hint" data-i18n="pollHint">Reads the small top-app cgroup file directly; no repeated dumpsys calls.</p>
       </section>
 
       <section class="menu-grid">

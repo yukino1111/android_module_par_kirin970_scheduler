@@ -2,7 +2,7 @@
 MODDIR=${0%/*}/..
 . "$MODDIR/lib/common.sh"
 
-PROFILE_KEYS="little_min little_max little_hispeed little_go_hispeed_load little_target_loads little_above_hispeed_delay little_min_sample_time big_min big_max big_hispeed big_go_hispeed_load big_target_loads big_above_hispeed_delay big_min_sample_time gpu_min gpu_max eas_boost"
+PROFILE_KEYS="little_min little_max little_hispeed little_go_hispeed_load little_target_loads little_above_hispeed_delay little_min_sample_time big_min big_max big_hispeed big_go_hispeed_load big_target_loads big_above_hispeed_delay big_min_sample_time gpu_min gpu_max eas_boost stune_boost stune_prefer_idle ddr_latency_min"
 LITTLE_FREQS="509000 1018000 1210000 1402000 1556000 1690000 1844000"
 BIG_FREQS="682000 1018000 1210000 1364000 1498000 1652000 1863000 2093000 2362000"
 GPU_FREQS="103750000 150909000 237143000 332000000 415000000 550000000 667000000 767000000"
@@ -34,7 +34,7 @@ validate_profile_file() {
   file="$1"
   [ -s "$file" ] || return 1
   [ "$(wc -c <"$file")" -le 8192 ] || return 1
-  [ "$(awk 'NF { count++ } END { print count+0 }' "$file")" -eq 17 ] || return 1
+  [ "$(awk 'NF { count++ } END { print count+0 }' "$file")" -eq 20 ] || return 1
 
   for key in $PROFILE_KEYS; do
     [ "$(awk -F= -v wanted="$key" '$1 == wanted { count++ } END { print count+0 }' "$file")" -eq 1 ] || return 1
@@ -53,6 +53,9 @@ validate_profile_file() {
   gpu_min="$(conf_get gpu_min "$file")"
   gpu_max="$(conf_get gpu_max "$file")"
   eas_boost="$(conf_get eas_boost "$file")"
+  stune_boost="$(conf_get stune_boost "$file")"
+  stune_prefer_idle="$(conf_get stune_prefer_idle "$file")"
+  ddr_latency_min="$(conf_get ddr_latency_min "$file")"
 
   in_list "$little_min" $LITTLE_FREQS && in_list "$little_max" $LITTLE_FREQS &&
     in_list "$little_hispeed" $LITTLE_FREQS || return 1
@@ -62,7 +65,12 @@ validate_profile_file() {
   [ "$little_min" -le "$little_hispeed" ] && [ "$little_hispeed" -le "$little_max" ] || return 1
   [ "$big_min" -le "$big_hispeed" ] && [ "$big_hispeed" -le "$big_max" ] || return 1
   [ "$gpu_min" -le "$gpu_max" ] || return 1
-  is_int "$eas_boost" && [ "$eas_boost" -ge 0 ] && [ "$eas_boost" -le 100 ] || return 1
+  case "$eas_boost:$stune_prefer_idle" in
+    [01]:[01]) ;;
+    *) return 1 ;;
+  esac
+  is_int "$stune_boost" && [ "$stune_boost" -ge 0 ] && [ "$stune_boost" -le 100 ] || return 1
+  in_list "$ddr_latency_min" 0 533000000 1244000000 1866000000 || return 1
 
   for key in little_go_hispeed_load big_go_hispeed_load; do
     value="$(conf_get "$key" "$file")"
@@ -146,6 +154,7 @@ print_status() {
   printf 'global_profile=%s\n' "$(conf_get global_profile "$SETTINGS_FILE")"
   printf 'dynamic_enabled=%s\n' "$(conf_get dynamic_enabled "$SETTINGS_FILE")"
   printf 'poll_interval=%s\n' "$(conf_get poll_interval "$SETTINGS_FILE")"
+  printf 'thread_status=%s\n' "$(cat "$STATE_DIR/thread-status" 2>/dev/null)"
   printf 'uniperf_mode=%s\n' "$(conf_get uniperf_mode "$SETTINGS_FILE")"
   printf 'active_profile=%s\n' "$(cat "$STATE_DIR/active-profile" 2>/dev/null)"
   printf 'foreground_package=%s\n' "$(cat "$STATE_DIR/foreground-package" 2>/dev/null)"

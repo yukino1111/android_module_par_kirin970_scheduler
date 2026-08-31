@@ -7,6 +7,7 @@ LITTLE="$SYSROOT/sys/devices/system/cpu/cpu0/cpufreq"
 BIG="$SYSROOT/sys/devices/system/cpu/cpu4/cpufreq"
 GPU="$SYSROOT/sys/devices/platform/e82c0000.mali/devfreq/gpufreq"
 EAS="$SYSROOT/sys/kernel/eas/boost"
+DDR_LATENCY="$SYSROOT/sys/class/devfreq/ddrfreq_latency"
 
 node_write() {
   path="$1"
@@ -65,6 +66,11 @@ apply_profile() {
   node_write "$GPU/min_freq" "$(profile_value gpu_min "$profile_file")"
   node_write "$EAS" "$(profile_value eas_boost "$profile_file")"
 
+  # The active PAR kernel exposes Huawei's DDR latency vote device, not the
+  # stock-ROM memlat_cpu4 class and not Qualcomm LLCC controls. A zero vote
+  # releases the floor; performance uses a known Kirin 970 OPP below max DDR.
+  node_write "$DDR_LATENCY/min_freq" "$(profile_value ddr_latency_min "$profile_file")"
+
   printf '%s\n' "$profile" >"$STATE_DIR/active-profile"
   log_msg "applied profile=$profile"
 }
@@ -114,8 +120,17 @@ restore_uniperf_component() {
   log_msg "restored UniPerf component=$component profile=$profile"
 }
 
+restore_stock_scheduler() {
+  # These values are installed by Huawei's Kirin 970 init script and confirmed
+  # against the nodes exposed by the current PAR kernel.
+  node_write "$EAS" 0
+  node_write "$DDR_LATENCY/min_freq" 0
+  log_msg "restored stock EAS and DDR latency votes"
+}
+
 case "$1" in
   apply) apply_profile "$2" ;;
   restore-uniperf) restore_uniperf_component "$2" "$3" ;;
-  *) printf 'usage: %s {apply <profile>|restore-uniperf <profile> <big|gpu>}\n' "$0" >&2; exit 2 ;;
+  restore-stock-scheduler) restore_stock_scheduler ;;
+  *) printf 'usage: %s {apply <profile>|restore-uniperf <profile> <big|gpu>|restore-stock-scheduler}\n' "$0" >&2; exit 2 ;;
 esac

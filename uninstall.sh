@@ -1,6 +1,7 @@
 #!/system/bin/sh
 MODDIR=${0%/*}
 . "$MODDIR/lib/common.sh"
+. "$MODDIR/lib/thread-scheduler.sh"
 
 set_uniperf_bridge_enabled 0
 
@@ -11,6 +12,8 @@ if daemon_pid_valid "$daemon_pid"; then
   daemon_pid_valid "$daemon_pid" && kill -9 "$daemon_pid" 2>/dev/null
 fi
 rm -f "$STATE_DIR/daemon.pid" "$STATE_DIR/reload"
+thread_remove_stune
+"$MODDIR/bin/engine.sh" restore-stock-scheduler
 
 # Mountify merges module contents into shared OverlayFS mounts. Framework event
 # delivery is disabled immediately; KernelSU removes

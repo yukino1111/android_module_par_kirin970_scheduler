@@ -1,6 +1,7 @@
 #!/system/bin/sh
 MODDIR=${0%/*}/..
 . "$MODDIR/lib/common.sh"
+. "$MODDIR/lib/thread-scheduler.sh"
 
 mkdir -p "$STATE_DIR"
 if [ -s "$STATE_DIR/daemon.pid" ]; then
@@ -9,34 +10,21 @@ if [ -s "$STATE_DIR/daemon.pid" ]; then
   rm -f "$STATE_DIR/daemon.pid"
 fi
 printf '%s\n' "$$" >"$STATE_DIR/daemon.pid"
-trap 'rm -f "$STATE_DIR/daemon.pid"; exit 0' TERM INT
-trap 'rm -f "$STATE_DIR/daemon.pid"' EXIT
+daemon_cleanup() {
+  [ "$daemon_cleanup_done" = 1 ] && return 0
+  daemon_cleanup_done=1
+  thread_restore_managed
+  rm -f "$STATE_DIR/daemon.pid" "$TOP_APP_ROWS"
+}
+daemon_cleanup_done=0
+trap 'daemon_cleanup; exit 0' TERM INT
+trap 'daemon_cleanup' EXIT
 
 waited=0
 while [ "$(getprop sys.boot_completed 2>/dev/null)" != "1" ] && [ "$waited" -lt 180 ]; do
   sleep 2
   waited=$((waited + 2))
 done
-
-foreground_package() {
-  # AOSP 13 no longer includes focus state in the "windows" sub-dump on PAR.
-  # "displays" is the smallest WindowManager sub-dump that still exposes
-  # mFocusedApp, so avoid the substantially larger full dump on every poll.
-  dumpsys window displays 2>/dev/null |
-    awk '
-      /mFocusedApp/ {
-        for (i = 1; i <= NF; i++) {
-          if ($i ~ /\//) {
-            value=$i
-            sub(/^.*[ {]/, "", value)
-            sub(/\/.*/, "", value)
-            gsub(/[}]/, "", value)
-            if (value ~ /^[A-Za-z0-9_][A-Za-z0-9._]*$/) { print value; exit }
-          }
-        }
-      }
-    '
-}
 
 rule_profile() {
   package_name="$1"
@@ -134,6 +122,7 @@ reconcile_uniperf_limits() {
 
 last_profile=
 last_package=
+last_thread_key=
 load_runtime_config
 force_apply=1
 log_msg "daemon started"
@@ -147,11 +136,29 @@ while :; do
 
   selected_profile="$runtime_global_profile"
   package_name=
+  matched_package=
+  matched_profile=
 
-  if [ "$runtime_dynamic_enabled" = "1" ] && [ "$runtime_has_rules" = "1" ]; then
-    package_name="$(foreground_package)"
-    app_profile="$(rule_profile "$package_name")"
-    allowed_profile "$app_profile" && selected_profile="$app_profile"
+  # Read the kernel-maintained top-app cgroup directly. This avoids serializing
+  # WindowManager state through dumpsys on every sample. Cgroup v1 does not
+  # expose a portable membership-change event, so this tiny file is sampled at
+  # the configured interval instead.
+  refresh_top_app_rows
+  while IFS='|' read -r candidate_pid candidate_package candidate_extra; do
+    [ -z "$candidate_extra" ] || continue
+    [ -n "$package_name" ] || package_name="$candidate_package"
+    if [ "$runtime_dynamic_enabled" = 1 ] && [ "$runtime_has_rules" = 1 ]; then
+      candidate_profile="$(rule_profile "$candidate_package")"
+      if allowed_profile "$candidate_profile"; then
+        matched_package="$candidate_package"
+        matched_profile="$candidate_profile"
+        break
+      fi
+    fi
+  done <"$TOP_APP_ROWS"
+  if [ -n "$matched_package" ]; then
+    package_name="$matched_package"
+    selected_profile="$matched_profile"
   fi
 
   if [ "$selected_profile" != "$last_profile" ] || [ "$force_apply" = "1" ]; then
@@ -167,6 +174,8 @@ while :; do
     printf '%s\n' "$package_name" >"$STATE_DIR/foreground-package"
     last_package="$package_name"
   fi
+
+  thread_reconcile "$package_name" "$selected_profile"
 
   sleep "$runtime_poll_interval"
 done

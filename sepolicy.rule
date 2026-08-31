@@ -2,3 +2,17 @@
 # The platform policy carries the same narrow grant in newly built images; this
 # systemless copy fixes already-installed 202608120835 images after a soft reboot.
 allow system_server kirin_perfgenius_prop file { getattr open read map }
+
+# The current PAR policy labels Huawei's EAS controls separately but leaves
+# ddrfreq_latency on the generic sysfs type. KernelSU module services run in the
+# ksu domain, so grant only file I/O needed by guarded existing-node writes.
+# No create, unlink, ioctl, or executable permission is added.
+allow ksu sysfs_eas dir { getattr open read search }
+allow ksu sysfs_eas file { getattr open read write }
+allow ksu sysfs dir { getattr open read search }
+allow ksu sysfs file { getattr open read write }
+
+# Android 13 does not mount the schedtune controller on PAR even though the
+# kernel provides it. Permit the module-owned /dev/stune/par-game hierarchy.
+allow ksu cgroup dir { add_name create getattr open read remove_name search write }
+allow ksu cgroup file { create getattr open read write }
